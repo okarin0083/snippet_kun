@@ -1,4 +1,6 @@
 # TB Pager
+https://okarin0083.github.io/tb-pager/
+
 ティラノビルダー向けの **セリフ整形・ページ割りツール**。
 ブラウザだけで動作します。自分用にchatGPTで作りました。
 
