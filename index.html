@@ -299,13 +299,15 @@
       color: var(--text-main);
       white-space: normal;
     }
-    @media (min-width: 900px) {
-      .layout {
-        display: grid;
-        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-        gap: 12px;
-      }
+    
+  
+    .layout {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 12px;
+      display: block;
     }
+
   </style>
 </head>
 <body>
