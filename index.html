@@ -1,1137 +1,292 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>TB Pager ver0.391</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    :root {
-      --accent: #2563eb;
-      --accent-soft: #dbeafe;
-      --border-soft: #e5e7eb;
-      --bg: #f3f4f6;
-      --text-main: #111827;
-      --text-sub: #6b7280;
-      --danger: #dc2626;
-    }
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      margin: 0;
-      padding: 16px;
-      background: var(--bg);
-      color: var(--text-main);
-    }
-    h1 {
-      font-size: 18px;
-      margin: 0 0 4px;
-    }
-    .desc {
-      font-size: 12px;
-      color: var(--text-sub);
-      margin-bottom: 12px;
-    }
-    .card {
-      background: #ffffff;
-      border-radius: 10px;
-      border: 1px solid var(--border-soft);
-      padding: 12px 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
-    }
-    .section-title {
-      margin: 0 0 6px;
-      font-size: 13px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .section-title span.badge {
-      font-size: 10px;
-      font-weight: 600;
-      padding: 1px 6px;
-      border-radius: 999px;
-      background: var(--accent-soft);
-      color: var(--accent);
-    }
-    .subtext {
-      font-size: 11px;
-      color: var(--text-sub);
-      margin-top: 2px;
-    }
-    .editor-wrapper {
-      position: relative;
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid var(--border-soft);
-      background: #ffffff;
-    }
-    .editor-guide-layer {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 1;
-    }
-    .editor-guide-line {
-      position: absolute;
-      left: 0;
-      right: 0;
-      border-bottom: 2px solid red;
-      font-size: 9px;
-      color: red;
-      padding-right: 6px;
-      text-align: right;
-      display: flex;
-      align-items: flex-end;
-      justify-content: flex-end;
-    }
-    .editor-guide-line span {
-      background: rgba(255, 255, 255, 0.9);
-      padding-left: 4px;
-    }
+<meta charset="UTF-8">
+<title>スニペット登録表 ver2.0</title>
 
-    .wrap-guide-layer {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 2;
-    }
-    .wrap-guide-line {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      border-left: 1px solid #2563eb;
-      opacity: 0.8;
-    }
+<style>
+body {
+  font-family: sans-serif;
+  background:#1e1e1e;
+  color:#ddd;
+  padding:20px;
+}
+h1 { border-bottom:1px solid #555; }
 
-    textarea {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      height: 180px;
-      border: none;
-      outline: none;
-      resize: vertical;
-      padding: 8px 10px;
-      font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 13px;
-      line-height: 1.5;
-      background: rgba(255, 255, 255, 0.96);
-      color: var(--text-main);
-    }
-    textarea:focus {
-      outline: none;
-    }
-    .counter-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 4px;
-      font-size: 11px;
-      color: var(--text-sub);
-    }
-    .counter-row .counter {
-      text-align: right;
-    }
-    button.primary {
-      padding: 7px 16px;
-      font-size: 13px;
-      border-radius: 999px;
-      border: 1px solid var(--accent);
-      background: var(--accent);
-      color: #ffffff;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 500;
-    }
-    button.primary:hover {
-      filter: brightness(1.05);
-    }
-    button.primary:active {
-      transform: translateY(1px);
-    }
-    button.icon {
-      border-radius: 999px;
-      border: 1px solid var(--border-soft);
-      background: #ffffff;
-      padding: 4px 8px;
-      font-size: 11px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-    button.icon:hover {
-      background: #f9fafb;
-    }
-    .settings-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      font-size: 12px;
-      margin-top: 4px;
-    }
-    .settings-row label {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 12px;
-    }
-    input[type="number"],
-    input[type="text"] {
-      font-size: 12px;
-      padding: 4px 6px;
-      border-radius: 999px;
-      border: 1px solid var(--border-soft);
-      min-width: 0;
-    }
-    input[type="number"]:focus,
-    input[type="text"]:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.15);
-    }
-    .pill-input {
-      border-radius: 999px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-      background: #ffffff;
-    }
-    th, td {
-      border: 1px solid var(--border-soft);
-      padding: 3px 4px;
-    }
-    th {
-      background: #f9fafb;
-      font-weight: 600;
-    }
-    .small-btn {
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      border: 1px solid var(--border-soft);
-      background: #ffffff;
-      cursor: pointer;
-    }
-    .small-btn:hover {
-      background: #f3f4f6;
-    }
-    .char-list {
-      border: 1px solid var(--border-soft);
-      background: #f9fafb;
-      min-height: 80px;
-      max-height: 150px;
-      overflow-y: auto;
-      padding: 3px;
-      border-radius: 6px;
-      font-size: 12px;
-    }
-    .char-item {
-      padding: 2px 6px;
-      border-radius: 999px;
-      cursor: pointer;
-      margin-bottom: 2px;
-    }
-    .char-item.selected {
-      background: var(--accent-soft);
-      color: var(--accent);
-    }
-    .suggest-box {
-      position: absolute;
-      background: #ffffff;
-      border: 1px solid var(--border-soft);
-      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
-      font-size: 12px;
-      display: none;
-      z-index: 1000;
-      max-height: 180px;
-      overflow-y: auto;
-      border-radius: 8px;
-      min-width: 120px;
-    }
-    .suggest-item {
-      padding: 4px 8px;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .suggest-item.active {
-      background: var(--accent-soft);
-      color: var(--accent);
-    }
-    #preview {
-      margin-top: 4px;
-      padding: 6px 8px;
-      background: #f9fafb;
-      border-radius: 8px;
-      border: 1px solid var(--border-soft);
-      font-size: 12px;
-    }
-    .preview-title {
-      font-weight: 600;
-      margin-bottom: 4px;
-      font-size: 12px;
-      color: var(--text-sub);
-    }
-    .preview-block {
-      border-radius: 8px;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      padding: 4px 6px;
-      margin-bottom: 4px;
-      background: #ffffff;
-    }
-    .preview-name {
-      font-weight: 600;
-      margin-bottom: 2px;
-      font-size: 11px;
-      color: var(--accent);
-    }
-    .preview-body {
-      font-size: 11px;
-      color: var(--text-main);
-      white-space: normal;
-    }
-    
-  
-    .layout {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 0 12px;
-      display: block;
-    }
+.category-title {
+  font-size:1.3em;
+  margin-left:20px;
+  margin-bottom:4px;
+}
 
-  </style>
+table {
+  width:max-content;
+  border-collapse:collapse;
+  margin:0 auto 8px auto;
+}
+th,td {
+  border:1px solid #444;
+  padding:6px 8px;
+  white-space:nowrap;
+}
+th { background:#2a2a2a; }
 
-  <link rel="apple-touch-icon" href="icon.png">
-  <link rel="icon" href="icon.png">
+input, textarea {
+  width:100%;
+  box-sizing:border-box;
+  background:#252526;
+  color:#fff;
+  border:1px solid #555;
+  resize:vertical;
+}
 
+button { padding:2px 8px; margin-left:4px; }
+
+.control { text-align:center; margin-bottom:12px; }
+
+.add-row {
+  text-align:right;
+  margin:0 auto 16px auto;
+  width:max-content;
+}
+
+pre { background:#111; padding:10px; }
+</style>
 </head>
+
 <body>
-  <h1>TB Pager ver0.391</h1>
-  <div class="desc">
-    自分が入力しやすいようにカスタマイズした記号で<br>
-    ティラノビルダーのストーリー用テキストを整形してくれるツールです。<br>
-    メインとしては[p]（ページ送り）挿入、「」付け・行数調整がメイン軽量Webアプリです。<br>
-    Windowsでの運用をメインに想定した、軽量テキスト専用エディタ版です。
-  </div>
 
-  <div class="layout">
-    <div>
-      <div class="card">
-        <div class="section-title">
-          入力テキスト
-          <span class="badge">原稿入力</span>
-        </div>
-        <div class="subtext">
-          <code>#キャラ名</code> とセリフを入力します。行数設定に応じてページごとに <code>[p]</code> を自動付与します。
-        </div>
-        <div class="editor-wrapper">
-          <div id="inputGuideLayer" class="editor-guide-layer"></div>
-          <div id="wrapGuide" class="wrap-guide-layer"></div>
-          <textarea id="input" placeholder="#ヒロイン名
-「＃」を入れるとキャラ名一覧が出るわよ
+<h1>スニペット登録表 ver2.0</h1>
 
-#主人公
-一番下の「候補キャラ」キャラを登録できるよ"></textarea>
-        </div>
-        <div class="counter-row">
-          <div>入力欄</div>
-          <div class="counter" id="inputCounter">文字数: 0 / 行数: 0</div>
-        </div>
-      </div>
+<div class="control">
+  <button id="editToggle">編集モード：OFF</button>
+  <button onclick="saveData()">保存</button>
+  <button onclick="loadData()">読込</button>
+</div>
 
-      <div class="card">
-        <div class="section-title">
-          カギカッコ・ページ設定
-          <span class="badge">ページ制御</span>
-        </div>
-        <div class="settings-row">
-          <label style="font-weight:bold; color:#ef4444;">行数設定：
-            <input type="number" id="linesPerPage" value="4" min="1" style="width:70px;">
-            行ごとに
-          </label>
-          <label>ページ区切り文字列：
-            <input type="text" id="pageMark" value="[p]" class="pill-input" style="width:80px;">
-          </label>
-          <span style="font-size:11px; color:var(--text-sub);">を付ける</span>
-        <div class="settings-row" style="margin-top:4px;">
-          <label style="font-weight:bold; color:#2563eb;">文字数設定：約全角
-            <input type="number" id="charsPerLine" value="25" min="0" placeholder="（任意）" style="width:90px;">
-          </label>
-          <span class="subtext">（約 全角 n 文字ぶんの幅で行を自動折り返し・ガイド表示）</span>
-        </div>
+<div id="tables"></div>
 
-        <div class="settings-row" style="margin-top:6px;">
-          <label>カギカッコ開始：
-            <input type="text" id="quoteStart" value="「" class="pill-input" style="width:60px;">
-          </label>
-          <label>カギカッコ終了：
-            <input type="text" id="quoteEnd" value="」" class="pill-input" style="width:60px;">
-          </label>
-        </div>
-        <div class="subtext">
-          ※カギカッコは<b>各キャラのセリフブロックごと</b>に付与されます（行数設定に応じてページ分割）。
-        </div>
+<div class="control">
+  <button onclick="generate()">一括生成</button>
+  <button onclick="copyOutput()">一括コピー</button>
+</div>
 
-        <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-          <button id="convertBtn" class="primary">
-            <span>変換する</span>
-          </button>
-          <button id="copyOutputBtn" class="icon">
-            <span>出力をコピー</span>
-          </button>
-        </div>
-      </div>
+<h2>
+  <input class="lockable category-title" value="出力JSON" disabled>
+</h2>
+<pre id="output"></pre>
 
-      <div class="card">
-        <div class="section-title">
-          変換結果（ティラノにコピペする用）
-          <span class="badge">出力</span>
-        </div>
-        <div class="editor-wrapper" style="border-radius:8px;">
-          <textarea id="output" readonly></textarea>
-        </div>
-        <div class="counter-row">
-          <div>出力欄</div>
-          <div class="counter" id="outputCounter">文字数: 0 / 行数: 0</div>
-        </div>
+<script>
+/* ===============================
+   編集モード
+================================ */
+let editMode = false;
+const editBtn = document.getElementById("editToggle");
+editBtn.onclick = () => {
+  editMode = !editMode;
+  editBtn.textContent = editMode ? "編集モード：ON" : "編集モード：OFF";
+  document.querySelectorAll(".lockable").forEach(e=>{
+    e.disabled = !editMode;
+  });
+};
 
-        <div id="preview">
-          <div class="preview-title">簡易プレビュー（キャラごとのセリフまとめ）</div>
-          <div id="previewBody" style="font-size:12px; color:#777;">
-            変換するとここにキャラごとのセリフ一覧が表示されます。
-          </div>
-        </div>
-      </div>
-    </div>
+/* ===============================
+   55項目 固定データ（完全）
+================================ */
+const controls = [
+  { title:"アクター名表示", body:"\\N[$1]", desc:"アクターn番の名前を表示" },
+  { title:"変数表示", body:"\\V[$1]", desc:"変数n番の値を表示" },
+  { title:"文字色変更", body:"\\C[$1]", desc:"文字色変更" },
+  { title:"アイコン表示", body:"\\I[$1]", desc:"アイコン表示" },
+  { title:"入力待ち", body:"\\!", desc:"クリック待ち" },
+  { title:"短いウェイト", body:"\\.", desc:"短いウェイト" },
+  { title:"長いウェイト", body:"\\|", desc:"長いウェイト" },
+  { title:"高速表示開始", body:"\\>", desc:"高速表示開始" },
+  { title:"高速表示解除", body:"\\<", desc:"高速表示解除" },
+  { title:"文字拡大", body:"\\{", desc:"文字を大きく" },
+  { title:"文字縮小", body:"\\}", desc:"文字を小さく" },
+  { title:"ウィンドウ自動クローズ", body:"\\^", desc:"表示後に自動で閉じる" }
+];
 
-    <div>
-      <div class="card">
-        <div class="section-title">
-          置換ルール
-          <span class="badge">任意記号 → 任意文字列</span>
-        </div>
-        <div class="subtext">
-          設定した記号を「入力テキスト」で入力し、変換すると出力文字列に変換されます。<br>
-        </div>
-        <table style="margin-top:6px;">
-          <thead>
-            <tr>
-              <th style="width:90px;">名前</th>
-              <th style="width:80px;">入力</th>
-              <th>出力文字列</th>
-              <th style="width:60px;">台詞外</th>
-              <th style="width:50px;">有効</th>
-              <th style="width:40px;">削除</th>
-            </tr>
-          </thead>
-          <tbody id="rulesBody"></tbody>
-        </table>
-        <div style="margin-top:6px;">
-          <button class="small-btn" id="btnAddRule">＋ ルール追加</button>
-        </div>
-      </div>
+const tags = [
+  { title:"選択肢開始", body:"<ShowChoices>", desc:"選択肢表示開始" },
+  { title:"選択肢分岐", body:"<When:$1>", desc:"選択肢分岐" },
+  { title:"キャンセル分岐", body:"<WhenCancel>", desc:"キャンセル分岐" },
+  { title:"選択肢終了", body:"<End>", desc:"選択肢終了" },
+  { title:"スクロール文章開始", body:"<ShowScrollingText:$1,$2>", desc:"スクロール文章開始" },
+  { title:"スクロール文章終了", body:"</ShowScrollingText>", desc:"スクロール文章終了" },
 
-      <div class="card">
-        <div class="section-title">
-          #候補キャラ
-          <span class="badge">補完</span>
-        </div>
-        <div class="subtext">
-          入力欄で <code>#</code> または <code>＃</code> を入力すると、このリストからキャラ名候補が表示されます。
-        </div>
-        <div class="char-list" id="charList"></div>
-        <div class="settings-row" style="margin-top:6px;">
-          <input type="text" id="charNameInput" placeholder="キャラ名を入力" style="flex:1;">
-          <button class="small-btn" id="btnCharAdd">追加</button>
-          <button class="small-btn" id="btnCharDelete">削除</button>
-          <button class="small-btn" id="btnCharUp">↑</button>
-          <button class="small-btn" id="btnCharDown">↓</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  { title:"スイッチON", body:"<Switch:$1,ON>", desc:"スイッチON" },
+  { title:"スイッチOFF", body:"<Switch:$1,OFF>", desc:"スイッチOFF" },
+  { title:"セルフスイッチON", body:"<SelfSwitch:$1,ON>", desc:"セルフスイッチON" },
+  { title:"セルフスイッチOFF", body:"<SelfSwitch:$1,OFF>", desc:"セルフスイッチOFF" },
 
-  <div id="suggestBox" class="suggest-box"></div>
+  { title:"変数代入", body:"<Set:$1,$2>", desc:"変数代入" },
+  { title:"変数加算", body:"<Add:$1,$2>", desc:"変数加算" },
+  { title:"変数減算", body:"<Sub:$1,$2>", desc:"変数減算" },
+  { title:"変数乗算", body:"<Mul:$1,$2>", desc:"変数乗算" },
+  { title:"変数除算", body:"<Div:$1,$2>", desc:"変数除算" },
+  { title:"変数剰余", body:"<Mod:$1,$2>", desc:"変数剰余" },
 
-  <script>
-    // ===== データ =====
-    let replaceRules = [
-      { name: 'TB改行', from: '＠', to: '[r]', enabled: true, outside: true },
-      { name: 'TBクリック待ち', from: '；', to: '[l]', enabled: true, outside: true }
-    ];
-    let characters = ['主人公A', 'ヒロインB', 'モブC'];
-    let selectedCharIndex = -1;
+  { title:"ラベル設置", body:"<Label:$1>", desc:"ラベル設置" },
+  { title:"ラベルジャンプ", body:"<GotoLabel:$1>", desc:"ラベルジャンプ" },
+  { title:"ループ中断", body:"<BreakLoop>", desc:"ループ中断" },
+  { title:"イベント中断", body:"<AbortEvent>", desc:"イベント処理中断" },
 
-    // ===== DOM =====
-    const input = document.getElementById('input');
-    const inputGuideLayer = document.getElementById('inputGuideLayer');
-    const output = document.getElementById('output');
-    const convertBtn = document.getElementById('convertBtn');
-    const copyOutputBtn = document.getElementById('copyOutputBtn');
-    const inputCounter = document.getElementById('inputCounter');
-    const outputCounter = document.getElementById('outputCounter');
-    const linesPerPageInput = document.getElementById('linesPerPage');
-    const quoteStartInput = document.getElementById('quoteStart');
-    const quoteEndInput = document.getElementById('quoteEnd');
-    const pageMarkInput = document.getElementById('pageMark');
-    const charsPerLineInput = document.getElementById('charsPerLine');
+  { title:"コモンイベント", body:"<CommonEvent:$1>", desc:"コモンイベント呼び出し" },
+  { title:"タイマー開始", body:"<Timer:START,$1>", desc:"タイマー開始" },
+  { title:"タイマー停止", body:"<Timer:STOP>", desc:"タイマー停止" },
+  { title:"スクリプト実行", body:"<Script:$1>", desc:"スクリプト実行" },
+  { title:"プラグインコマンド", body:"<PluginCommand:$1>", desc:"MVプラグインコマンド" },
+  { title:"プラグインコマンドMZ", body:"<PluginCommandMZ:$1>", desc:"MZプラグインコマンド" },
 
-    const rulesBody = document.getElementById('rulesBody');
-    const btnAddRule = document.getElementById('btnAddRule');
+  { title:"所持金操作", body:"<Gold:$1>", desc:"所持金操作" },
+  { title:"アイテム増減", body:"<Item:$1,$2>", desc:"アイテム増減" },
+  { title:"武器増減", body:"<Weapon:$1,$2>", desc:"武器増減" },
+  { title:"防具増減", body:"<Armor:$1,$2>", desc:"防具増減" },
 
-    const charList = document.getElementById('charList');
-    const charNameInput = document.getElementById('charNameInput');
-    const btnCharAdd = document.getElementById('btnCharAdd');
-    const btnCharDelete = document.getElementById('btnCharDelete');
-    const btnCharUp = document.getElementById('btnCharUp');
-    const btnCharDown = document.getElementById('btnCharDown');
+  { title:"ピクチャ表示", body:"<ShowPicture:$1,$2,$3,$4,$5,$6,$7,$8>", desc:"ピクチャ表示" },
+  { title:"ピクチャ移動", body:"<MovePicture:$1,$2,$3,$4,$5,$6,$7,$8>", desc:"ピクチャ移動" },
+  { title:"ピクチャ消去", body:"<ErasePicture:$1>", desc:"ピクチャ消去" },
+  { title:"フェードアウト", body:"<FadeOut>", desc:"フェードアウト" },
+  { title:"フェードイン", body:"<FadeIn>", desc:"フェードイン" },
 
-    const suggestBox = document.getElementById('suggestBox');
-    const previewBody = document.getElementById('previewBody');
+  { title:"BGM再生", body:"<PlayBGM:$1,$2,$3,$4>", desc:"BGM再生" },
+  { title:"BGM停止", body:"<FadeOutBGM:$1>", desc:"BGM停止" },
+  { title:"SE再生", body:"<PlaySE:$1>", desc:"SE再生" },
+  { title:"SE停止", body:"<StopSE>", desc:"SE停止" },
 
-    // ===== 共通関数 =====
-    function escapeRegExp(str) {
-      return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
+  { title:"メニュー表示", body:"<MenuScreen>", desc:"メニュー画面表示" },
+  { title:"セーブ画面", body:"<SaveScreen>", desc:"セーブ画面表示" },
+  { title:"ゲームオーバー", body:"<GameOver>", desc:"ゲームオーバー" },
+  { title:"タイトルへ戻る", body:"<ReturnToTitle>", desc:"タイトルへ戻る" }
+];
 
-    function splitLines(text) {
-      return text.split('\n');
-    }
-    function visualWidth(str) {
-      // 全角=1, 半角=0.5 という見た目幅ベースの長さを返す
-      let w = 0;
-      for (const ch of str) {
-        const code = ch.charCodeAt(0);
-        // おおざっぱに：ASCII と半角カナは 0.5、それ以外は 1
-        if ((code >= 0x20 && code <= 0x7e) || (code >= 0xff61 && code <= 0xff9f)) {
-          w += 0.5;
-        } else {
-          w += 1;
-        }
-      }
-      return w;
-    }
+/* ===============================
+   表描画
+================================ */
+const container = document.getElementById("tables");
+renderTable("制御文字（MZ）", controls);
+renderTable("Text2Frame タグ", tags);
 
+function renderTable(titleText,data){
+  const h2=document.createElement("h2");
+  const ti=document.createElement("input");
+  ti.value=titleText;
+  ti.className="lockable category-title";
+  ti.disabled=true;
+  h2.appendChild(ti);
+  container.appendChild(h2);
 
-    function updateCounter(el, labelEl) {
-      const text = el.value;
-      const chars = text.length;
-      let lines;
-      if (el === input) {
-        // 入力欄は見た目上の行（折り返し含む）でカウント（全角=1, 半角=0.5）
-        const logicalLines = text === '' ? [] : splitLines(text);
-        const cpl = getCharsPerLine();
-        if (!cpl) {
-          lines = logicalLines.length;
-        } else {
-          let total = 0;
-          for (let i = 0; i < logicalLines.length; i++) {
-            let w = visualWidth(logicalLines[i]);
-            if (w <= 0) w = 1;
-            const visuals = Math.max(1, Math.ceil(w / cpl));
-            total += visuals;
-          }
-          lines = total;
-        }
-      } else {
-        // 出力などは従来どおり改行ベース
-        lines = text === '' ? 0 : splitLines(text).length;
-      }
-      labelEl.textContent = `文字数: ${chars} / 行数: ${lines}`;
-    }
+  const table=document.createElement("table");
+  table.innerHTML=`
+    <tr>
+      <th>項目</th>
+      <th>表示説明単語</th>
+      <th>呼出文字列</th>
+      <th>短縮ワード</th>
+      <th></th>
+    </tr>`;
+  data.forEach(d=>addRow(table,d));
+  container.appendChild(table);
 
-    function getLinesPerPage() {
-      const v = parseInt(linesPerPageInput.value, 10);
-      if (!v || v <= 0) return 0;
-      return v;
-    }
+  const add=document.createElement("div");
+  add.className="add-row";
+  const b=document.createElement("button");
+  b.textContent="＋ 行追加";
+  b.onclick=()=>addRow(table,{});
+  add.appendChild(b);
+  container.appendChild(add);
+}
 
-    function getCharsPerLine() {
-      const n = parseInt(charsPerLineInput.value, 10);
-      if (!n || n <= 0) return 0;
-      return n;
-    }
+function addRow(table,d){
+  const tr=document.createElement("tr");
+  tr.innerHTML=`
+    <td><textarea class="lockable" disabled>${d.title||""}</textarea></td>
+    <td><textarea class="lockable" disabled>${d.desc||""}</textarea></td>
+    <td><textarea class="lockable" disabled>${d.body||""}</textarea></td>
+    <td><input></td>
+    <td><button onclick="this.closest('tr').remove()">削除</button></td>`;
+  table.appendChild(tr);
+  tr.querySelectorAll("input,textarea").forEach(bindKey);
+}
 
-    function getPageMark() {
-      return pageMarkInput.value || '';
-    }
+/* ===============================
+   Enter / Shift+Enter 制御
+================================ */
+function bindKey(el){
+  el.addEventListener("keydown",e=>{
+    if(!editMode) return;
+    if(e.key!=="Enter") return;
+    if(e.isComposing) return;
+    if(e.shiftKey) return; // 改行
+    e.preventDefault();
+    moveDown(el);
+  });
+}
 
-    function updateInputWidth() {
-      const n = parseInt(charsPerLineInput.value, 10);
-      if (!n || n <= 0) {
-        input.style.width = '100%';
-        return;
-      }
-      // おおよそ n 文字で折り返される幅に調整（左右のpaddingぶん+20pxを加算）
-      input.style.width = `min(100%, calc(${n}ch + 20px))`;
-    }
+function moveDown(el){
+  const td=el.closest("td");
+  const tr=el.closest("tr");
+  const col=[...tr.children].indexOf(td);
+  const next=tr.nextElementSibling;
+  if(!next) return;
+  const t=next.children[col].querySelector("input,textarea");
+  if(t&&!t.disabled) t.focus();
+}
 
-    function updateWrapGuide() {
-      const n = parseInt(charsPerLineInput.value, 10);
-      const wrapLayer = document.getElementById('wrapGuide');
-      if (!wrapLayer) return;
+/* ===============================
+   保存 / 読込
+================================ */
+function saveData(){
+  const s=[...document.querySelectorAll("table")].map(t=>
+    [...t.querySelectorAll("tr")].slice(1).map(r=>
+      [...r.querySelectorAll("input,textarea")].map(i=>i.value)
+    )
+  );
+  localStorage.setItem("mz_snippet",JSON.stringify(s));
+  alert("保存しました");
+}
 
-      wrapLayer.innerHTML = '';
-      if (!n || n <= 0) {
-        return;
-      }
-      const line = document.createElement('div');
-      line.className = 'wrap-guide-line';
-
-      // テキストの開始位置（textareaのpadding-leftぶん＋枠線1pxぶん）を考慮
-      const paddingLeft = 10; // textareaの左padding（CSSで 10px）
-      line.style.left = `calc(${paddingLeft}px + ${n}ch)`;
-
-      wrapLayer.appendChild(line);
-    }
-
-
-    // ===== ページガイド（ガイド線） =====
-    function updateGuideLines() {
-      const text = input.value;
-      const lines = splitLines(text);
-      const per = getLinesPerPage();
-      inputGuideLayer.innerHTML = '';
-
-      if (!per || per <= 0 || !lines.length) return;
-
-      const taStyle = window.getComputedStyle(input);
-      const lineHeightPx = parseFloat(taStyle.lineHeight || '18');
-      const paddingTop = parseFloat(taStyle.paddingTop || '8');
-      const scrollTop = input.scrollTop;
-
-      // セリフ行をカウントしつつ、[p] が入るはずの「見た目の行インデックス」を集める
-      let speechCount = 0;
-      const breakLineIndexes = [];
-
-      const cpl = getCharsPerLine();
-      let visualIndex = 0;
-
-      for (let i = 0; i < lines.length; i++) {
-        const raw = lines[i];
-        const trimmed = raw.trim();
-        const isSpeaker = trimmed.startsWith('#');
-        const isTag = trimmed.startsWith('[');
-        const isComment = trimmed.startsWith(';');
-
-        let w = visualWidth(raw);
-        if (w <= 0) w = 1;
-        const visualLinesThis = cpl ? Math.max(1, Math.ceil(w / cpl)) : 1;
-
-        for (let v = 0; v < visualLinesThis; v++) {
-          if (isSpeaker) {
-            // 各キャラごとにカウントリセット
-            speechCount = 0;
-          } else if (!isTag && !isComment) {
-            // タグ・コメント以外（空白行も含む）をセリフとしてカウント
-            speechCount++;
-            const perNow = getLinesPerPage();
-            if (perNow && speechCount > 0 && speechCount % perNow === 0) {
-              breakLineIndexes.push(visualIndex); // この見た目行がページ末尾
-            }
-          }
-          visualIndex++;
-        }
-      }
-
-      const taHeight = input.clientHeight;
-
-      breakLineIndexes.forEach(idx => {
-        const top = paddingTop + idx * lineHeightPx - scrollTop;
-        if (top < 0 || top > taHeight) return; // 見えている範囲のみ描画
-
-        const lineElem = document.createElement('div');
-        lineElem.className = 'editor-guide-line';
-        lineElem.style.top = `${top}px`;
-        const mark = getPageMark() || '[p]';
-        lineElem.innerHTML = `<span>${mark}</span>`;
-        inputGuideLayer.appendChild(lineElem);
-      });
-    }
-
-    // ===== 入力欄イベント =====
-    let lastValue = "";
-    let hashtagPos = null;
-    let suggestVisible = false;
-    let suggestIndex = 0;
-    let ignoreNextInput = false;
-
-    input.addEventListener('input', () => {
-      if (ignoreNextInput) {
-        ignoreNextInput = false;
-        lastValue = input.value;
-        updateCounter(input, inputCounter);
-        updateGuideLines();
-        return;
-      }
-
-      const value = input.value;
-      const diff = value.length - lastValue.length;
-      if (diff === 1) {
-        let idx = 0;
-        while (idx < lastValue.length && lastValue[idx] === value[idx]) {
-          idx++;
-        }
-        const ch = value[idx];
-        if (ch === '#' || ch === '＃') {
-          hashtagPos = idx;
-          openSuggest();
-        }
-      }
-      lastValue = value;
-      updateCounter(input, inputCounter);
-      updateGuideLines();
+function loadData(){
+  const r=localStorage.getItem("mz_snippet");
+  if(!r) return alert("保存データなし");
+  const s=JSON.parse(r);
+  const tables=document.querySelectorAll("table");
+  s.forEach((rows,i)=>{
+    rows.forEach((vals,r)=>{
+      if(!tables[i].rows[r+1]) addRow(tables[i],{});
+      [...tables[i].rows[r+1].querySelectorAll("input,textarea")]
+        .forEach((e,c)=>e.value=vals[c]||"");
     });
+  });
+  alert("読込しました");
+}
 
-    input.addEventListener('scroll', () => {
-      updateGuideLines();
-    });
+/* ===============================
+   JSON生成
+================================ */
+function generate(){
+  const out={};
+  document.querySelectorAll("table tr").forEach((tr,i)=>{
+    if(i===0) return;
+    const c=tr.querySelectorAll("td");
+    if(!c.length) return;
+    const t=c[0].querySelector("textarea").value;
+    const d=c[1].querySelector("textarea").value;
+    const b=c[2].querySelector("textarea").value;
+    const p=c[3].querySelector("input").value;
+    if(!p) return;
+    out[t]={ prefix:p, body:[b], description:d };
+  });
+  output.textContent=JSON.stringify(out,null,2);
+}
 
-    linesPerPageInput.addEventListener('input', () => {
-      updateGuideLines();
-    });
+function copyOutput(){
+  navigator.clipboard.writeText(output.textContent)
+    .then(()=>alert("コピーしました"));
+}
+</script>
 
-    pageMarkInput.addEventListener('input', () => {
-      updateGuideLines();
-    });
-
-    charsPerLineInput.addEventListener('input', () => {
-      updateInputWidth();
-      updateWrapGuide();
-      updateGuideLines();
-    });
-
-    output.addEventListener('input', () => updateCounter(output, outputCounter));
-
-    // ===== カギカッコ＋ページ分割＋[p]ロジック =====
-    function applyReplaceRules(text) {
-      replaceRules.forEach(rule => {
-        if (!rule.enabled || !rule.from || rule.outside) return;
-        const re = new RegExp(escapeRegExp(rule.from), 'g');
-        text = text.replace(re, rule.to || '');
-      });
-      return text;
-    }
-
-    
-    function processText(src) {
-      const per = getLinesPerPage();
-      const quoteStart = quoteStartInput.value;
-      const quoteEnd = quoteEndInput.value;
-
-      const lines = splitLines(src);
-      const out = [];
-
-      let currentSpeaker = null;
-
-      const cpl = getCharsPerLine();
-      const outsideRules = replaceRules.filter(rule => rule.enabled && rule.from && rule.outside);
-
-      // 段落をページ単位のセリフブロックに変換する
-      function flushParagraph(paragraphLines) {
-        if (!paragraphLines || paragraphLines.length === 0) return;
-
-        const pages = [];
-        let speechCount = 0;
-        let currentLines = [];
-        let currentOutside = [];
-
-        for (let i = 0; i < paragraphLines.length; i++) {
-          let raw = paragraphLines[i];
-
-          // 台詞外ルールを適用（このページの外側に出す）
-          outsideRules.forEach(rule => {
-            try {
-              const re = new RegExp(escapeRegExp(rule.from), 'g');
-              raw = raw.replace(re, () => {
-                currentOutside.push(rule.to || '');
-                return '';
-              });
-            } catch (e) {
-              // 無効な正規表現は無視
-            }
-          });
-
-          currentLines.push(raw);
-
-          let w = visualWidth(raw);
-          if (w <= 0) w = 1;
-          const visualLinesThis = cpl ? Math.max(1, Math.ceil(w / cpl)) : 1;
-          if (per) {
-            speechCount += visualLinesThis;
-            if (speechCount >= per) {
-              pages.push({ lines: currentLines, outside: currentOutside });
-              currentLines = [];
-              currentOutside = [];
-              speechCount = 0;
-            }
-          }
-        }
-
-        if (currentLines.length > 0) {
-          pages.push({ lines: currentLines, outside: currentOutside });
-        }
-
-        const mark = getPageMark();
-        pages.forEach(page => {
-          const blockText = page.lines.join('\n');
-          const wrapped =
-            (quoteStart || '') +
-            blockText +
-            (quoteEnd || '');
-          const extra = page.outside.join('');
-          let full = wrapped + extra;
-          if (per && mark) {
-            full += mark;
-          }
-          out.push(full);
-        });
-      }
-
-      // 空行で段落を区切りながら全体を走査
-      let paragraphLines = [];
-
-      for (let i = 0; i < lines.length; i++) {
-        const raw = lines[i];
-        const trimmed = raw.trim();
-
-        const isSpeaker = trimmed.startsWith('#');
-        const isTag = trimmed.startsWith('[');
-        const isComment = trimmed.startsWith(';');
-        const isEmpty = trimmed === '';
-
-        if (isSpeaker) {
-          // 段落を閉じてから話者切り替え
-          flushParagraph(paragraphLines);
-          paragraphLines = [];
-          currentSpeaker = trimmed.slice(1).trim() || null;
-          out.push(raw); // #キャラ名 行はそのまま
-        } else if (isTag || isComment) {
-          // 段落を閉じてからタグ/コメントを出力
-          flushParagraph(paragraphLines);
-          paragraphLines = [];
-          out.push(raw);
-        } else {
-          // セリフまたは空行（空白行も段落区切りとみなす）
-          if (isEmpty) {
-            flushParagraph(paragraphLines);
-            paragraphLines = [];
-          } else {
-            paragraphLines.push(raw);
-          }
-        }
-      }
-
-      // ファイル末尾の段落を処理
-      flushParagraph(paragraphLines);
-
-      // 最後のセリフブロックの末尾だけ [p] を外す
-      const mark = getPageMark();
-      if (mark) {
-        for (let i = out.length - 1; i >= 0; i--) {
-          const s = out[i];
-          if (typeof s === 'string' && s.endsWith(mark)) {
-            out[i] = s.slice(0, -mark.length);
-            break;
-          }
-        }
-      }
-
-      let result = out.join('\n');
-      result = applyReplaceRules(result);
-      return result;
-    }
-    // ===== 簡易プレビュー =====
-    function buildPreview(text) {
-      const lines = splitLines(text);
-      previewBody.innerHTML = '';
-
-      let currentName = '（名無し）';
-      let currentLines = [];
-
-      function flush() {
-        if (currentLines.length === 0) return;
-        const block = document.createElement('div');
-        block.className = 'preview-block';
-
-        const nameEl = document.createElement('div');
-        nameEl.className = 'preview-name';
-        nameEl.textContent = currentName;
-
-        const bodyEl = document.createElement('div');
-        bodyEl.className = 'preview-body';
-        bodyEl.textContent = currentLines.join(' / ');
-
-        block.appendChild(nameEl);
-        block.appendChild(bodyEl);
-        previewBody.appendChild(block);
-
-        currentLines = [];
-      }
-
-      for (let raw of lines) {
-        const trimmed = raw.trim();
-        if (trimmed === '') continue;
-
-        if (trimmed.startsWith('#')) {
-          flush();
-          const name = trimmed.slice(1).trim();
-          currentName = name || '（名無し）';
-        } else if (trimmed.startsWith('[') || trimmed.startsWith(';')) {
-          continue;
-        } else {
-          currentLines.push(trimmed);
-        }
-      }
-      flush();
-
-      if (!previewBody.hasChildNodes()) {
-        previewBody.textContent = 'セリフが見つかりませんでした。#キャラ名 とセリフ行を入力してから変換してください。';
-      }
-    }
-
-    // ===== 変換ボタン =====
-    convertBtn.addEventListener('click', () => {
-      const src = input.value;
-      const result = processText(src);
-      output.value = result;
-      updateCounter(output, outputCounter);
-      output.focus();
-      output.select();
-
-      buildPreview(result);
-      updateGuideLines();
-    });
-
-    // ===== コピー =====
-    copyOutputBtn.addEventListener('click', () => {
-      output.select();
-      try {
-        document.execCommand('copy');
-      } catch (e) {}
-    });
-
-    // ===== 置換ルールUI =====
-    function renderRulesTable() {
-      rulesBody.innerHTML = '';
-      replaceRules.forEach((rule, index) => {
-        const tr = document.createElement('tr');
-
-        const tdName = document.createElement('td');
-        const inName = document.createElement('input');
-        inName.type = 'text';
-        inName.value = rule.name || '';
-        inName.addEventListener('input', () => { rule.name = inName.value; });
-        tdName.appendChild(inName);
-
-        const tdFrom = document.createElement('td');
-        const inFrom = document.createElement('input');
-        inFrom.type = 'text';
-        inFrom.value = rule.from;
-        inFrom.addEventListener('input', () => { rule.from = inFrom.value; });
-        tdFrom.appendChild(inFrom);
-
-        const tdTo = document.createElement('td');
-        const inTo = document.createElement('input');
-        inTo.type = 'text';
-        inTo.value = rule.to;
-        inTo.addEventListener('input', () => { rule.to = inTo.value; });
-        tdTo.appendChild(inTo);
-
-        const tdOutside = document.createElement('td');
-        tdOutside.style.textAlign = 'center';
-        const chkOutside = document.createElement('input');
-        chkOutside.type = 'checkbox';
-        chkOutside.checked = !!rule.outside;
-        chkOutside.addEventListener('change', () => { rule.outside = chkOutside.checked; });
-        tdOutside.appendChild(chkOutside);
-
-        const tdEnabled = document.createElement('td');
-        tdEnabled.style.textAlign = 'center';
-        const chk = document.createElement('input');
-        chk.type = 'checkbox';
-        chk.checked = !!rule.enabled;
-        chk.addEventListener('change', () => { rule.enabled = chk.checked; });
-        tdEnabled.appendChild(chk);
-
-        const tdDel = document.createElement('td');
-        tdDel.style.textAlign = 'center';
-        const delBtn = document.createElement('button');
-        delBtn.textContent = '－';
-        delBtn.className = 'small-btn';
-        delBtn.addEventListener('click', () => {
-          replaceRules.splice(index, 1);
-          renderRulesTable();
-        });
-        tdDel.appendChild(delBtn);
-
-        tr.appendChild(tdName);
-        tr.appendChild(tdFrom);
-        tr.appendChild(tdTo);
-        tr.appendChild(tdOutside);
-        tr.appendChild(tdEnabled);
-        tr.appendChild(tdDel);
-        rulesBody.appendChild(tr);
-      });
-    }
-
-    btnAddRule.addEventListener('click', () => {
-      replaceRules.push({ name: '', from: '', to: '', enabled: true, outside: false });
-      renderRulesTable();
-    });
-
-    // ===== キャラリストUI =====
-    function renderCharList() {
-      charList.innerHTML = '';
-      characters.forEach((name, index) => {
-        const div = document.createElement('div');
-        div.textContent = name;
-        div.className = 'char-item' + (index === selectedCharIndex ? ' selected' : '');
-        div.addEventListener('click', () => {
-          selectedCharIndex = index;
-          renderCharList();
-        });
-        charList.appendChild(div);
-      });
-    }
-
-    btnCharAdd.addEventListener('click', () => {
-      const name = charNameInput.value; // trimをやめて、空白だけの名前も許可
-      if (!name) return; // 完全な空文字だけ弾く
-      characters.push(name);
-      charNameInput.value = '';
-      selectedCharIndex = characters.length - 1;
-      renderCharList();
-    });
-
-    btnCharDelete.addEventListener('click', () => {
-      if (selectedCharIndex < 0) return;
-      characters.splice(selectedCharIndex, 1);
-      if (selectedCharIndex >= characters.length) {
-        selectedCharIndex = characters.length - 1;
-      }
-      renderCharList();
-    });
-
-    btnCharUp.addEventListener('click', () => {
-      if (selectedCharIndex <= 0) return;
-      const i = selectedCharIndex;
-      const tmp = characters[i - 1];
-      characters[i - 1] = characters[i];
-      characters[i] = tmp;
-      selectedCharIndex--;
-      renderCharList();
-    });
-
-    btnCharDown.addEventListener('click', () => {
-      if (selectedCharIndex < 0 || selectedCharIndex >= characters.length - 1) return;
-      const i = selectedCharIndex;
-      const tmp = characters[i + 1];
-      characters[i + 1] = characters[i];
-      characters[i] = tmp;
-      selectedCharIndex++;
-      renderCharList();
-    });
-
-    // ===== #補完（iPad対応） =====
-    function showSuggestBox() {
-      if (!suggestVisible || characters.length === 0) {
-        suggestBox.style.display = 'none';
-        return;
-      }
-      suggestBox.innerHTML = '';
-      characters.forEach((name, i) => {
-        const item = document.createElement('div');
-        item.textContent = name;
-        item.className = 'suggest-item' + (i === suggestIndex ? ' active' : '');
-        item.addEventListener('mousedown', (e) => {
-          e.preventDefault();
-          insertSelectedCharacter(i);
-        });
-        suggestBox.appendChild(item);
-      });
-      const rect = input.getBoundingClientRect();
-      const top = rect.top + window.scrollY + 24;
-      const left = rect.left + window.scrollX + 8;
-      suggestBox.style.top = top + 'px';
-      suggestBox.style.left = left + 'px';
-      suggestBox.style.display = 'block';
-    }
-
-    function openSuggest() {
-      if (characters.length === 0) return;
-      suggestVisible = true;
-      suggestIndex = 0;
-      showSuggestBox();
-    }
-
-    function closeSuggest() {
-      suggestVisible = false;
-      suggestBox.style.display = 'none';
-      hashtagPos = null;
-    }
-
-    function insertSelectedCharacter(index) {
-      if (hashtagPos == null) return;
-      const name = characters[index];
-      const value = input.value;
-      const before = value.slice(0, hashtagPos);
-      const after = value.slice(hashtagPos + 1);
-      const inserted = '#' + name;
-      const newText = before + inserted + after;
-      ignoreNextInput = true;
-      input.value = newText;
-      lastValue = newText;
-      const newPos = before.length + inserted.length;
-      input.selectionStart = input.selectionEnd = newPos;
-      closeSuggest();
-      updateCounter(input, inputCounter);
-      updateGuideLines();
-      input.focus();
-    }
-
-    input.addEventListener('keydown', (e) => {
-      if (suggestVisible) {
-        if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          suggestIndex = (suggestIndex + 1) % characters.length;
-          showSuggestBox();
-        } else if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          suggestIndex = (suggestIndex - 1 + characters.length) % characters.length;
-          showSuggestBox();
-        } else if (e.key === 'Enter') {
-          e.preventDefault();
-          insertSelectedCharacter(suggestIndex);
-        } else if (e.key === 'Escape') {
-          e.preventDefault();
-          closeSuggest();
-        }
-      }
-    });
-
-    input.addEventListener('blur', () => {
-      setTimeout(() => { closeSuggest(); }, 150);
-    });
-
-    // 初期描画
-    lastValue = input.value;
-    updateCounter(input, inputCounter);
-    updateCounter(output, outputCounter);
-    renderRulesTable();
-    renderCharList();
-    updateInputWidth();
-    updateWrapGuide();
-    updateGuideLines();
-  </script>
 </body>
 </html>
