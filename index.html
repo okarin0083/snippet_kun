@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>スニペットくんver1.0.2</title>
+<title>スニペットくんver1.0.3</title>
 
 <style>
 body {
@@ -56,7 +56,7 @@ pre { background:#111; padding:10px; }
 
 <body>
 
-<h1>スニペットくんver1.0.2</h1>
+<h1>スニペットくんver1.0.3</h1>
 
 <div class="control">
   <button id="editToggle">編集モード：OFF</button>
@@ -257,23 +257,21 @@ function loadData(){
 }
 
 /* ===============================
-   入力全消去
+   入力全消去（修正済み）
 ================================ */
 function clearAll(){
   if(!editMode) return alert("編集モードをONにしてください");
   if(!confirm("すべての入力内容を消去します。よろしいですか？")) return;
 
-  document.querySelectorAll("table tr").forEach(tr=>{
-    tr.querySelectorAll("input,textarea").forEach(el=>{
-      el.value = "";
-    });
-  });
+  document
+    .querySelectorAll("table td input, table td textarea")
+    .forEach(el => el.value = "");
 
   alert("入力内容を全消去しました");
 }
 
 /* ===============================
-   JSON生成
+   JSON生成（完全修正）
 ================================ */
 function generate(){
   const out = {};
@@ -281,7 +279,7 @@ function generate(){
   document.querySelectorAll("table").forEach(table=>{
     [...table.rows].slice(1).forEach(tr=>{
       const c = tr.querySelectorAll("td");
-      if(!c.length) return;
+      if(c.length < 4) return;   // ★最重要ガード
 
       const t = c[0].querySelector("textarea")?.value || "";
       const d = c[1].querySelector("textarea")?.value || "";
