@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>スニペットくんver1.0</title>
+<title>スニペットくんver1.0.2</title>
 
 <style>
 body {
@@ -56,12 +56,13 @@ pre { background:#111; padding:10px; }
 
 <body>
 
-<h1>スニペットくんver1.0</h1>
+<h1>スニペットくんver1.0.2</h1>
 
 <div class="control">
   <button id="editToggle">編集モード：OFF</button>
   <button onclick="saveData()">保存</button>
   <button onclick="loadData()">読込</button>
+  <button onclick="clearAll()">入力全消去</button>
 </div>
 
 <div id="tables"></div>
@@ -200,8 +201,6 @@ function addRow(table,d){
     <td><input></td>
     <td><button onclick="this.closest('tr').remove()">削除</button></td>`;
   table.appendChild(tr);
-
-  /* ★ Enter移動を必ずバインド */
   tr.querySelectorAll("input,textarea").forEach(bindKey);
 }
 
@@ -213,7 +212,7 @@ function bindKey(el){
     if(!editMode) return;
     if(e.key!=="Enter") return;
     if(e.isComposing) return;
-    if(e.shiftKey) return; // 改行
+    if(e.shiftKey) return;
     e.preventDefault();
     moveDown(el);
   });
@@ -258,22 +257,48 @@ function loadData(){
 }
 
 /* ===============================
+   入力全消去
+================================ */
+function clearAll(){
+  if(!editMode) return alert("編集モードをONにしてください");
+  if(!confirm("すべての入力内容を消去します。よろしいですか？")) return;
+
+  document.querySelectorAll("table tr").forEach(tr=>{
+    tr.querySelectorAll("input,textarea").forEach(el=>{
+      el.value = "";
+    });
+  });
+
+  alert("入力内容を全消去しました");
+}
+
+/* ===============================
    JSON生成
 ================================ */
 function generate(){
-  const out={};
-  document.querySelectorAll("table tr").forEach((tr,i)=>{
-    if(i===0) return;
-    const c=tr.querySelectorAll("td");
-    if(!c.length) return;
-    const t=c[0].querySelector("textarea").value;
-    const d=c[1].querySelector("textarea").value;
-    const b=c[2].querySelector("textarea").value;
-    const p=c[3].querySelector("input").value;
-    if(!p) return;
-    out[t]={ prefix:p, body:[b], description:d };
+  const out = {};
+
+  document.querySelectorAll("table").forEach(table=>{
+    [...table.rows].slice(1).forEach(tr=>{
+      const c = tr.querySelectorAll("td");
+      if(!c.length) return;
+
+      const t = c[0].querySelector("textarea")?.value || "";
+      const d = c[1].querySelector("textarea")?.value || "";
+      const b = c[2].querySelector("textarea")?.value || "";
+      const p = c[3].querySelector("input")?.value || "";
+
+      if(!t || !p) return;
+
+      out[t] = {
+        prefix: p,
+        body: [b],
+        description: d
+      };
+    });
   });
-  output.textContent=JSON.stringify(out,null,2);
+
+  output.textContent = JSON.stringify(out, null, 2);
 }
 
 function copyOutput(){
