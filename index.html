@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>スニペット登録表 ver2.0</title>
+<title>スニペットくんver1.0</title>
 
 <style>
 body {
@@ -56,7 +56,7 @@ pre { background:#111; padding:10px; }
 
 <body>
 
-<h1>スニペット登録表 ver2.0</h1>
+<h1>スニペットくんver1.0</h1>
 
 <div class="control">
   <button id="editToggle">編集モード：OFF</button>
@@ -72,7 +72,7 @@ pre { background:#111; padding:10px; }
 </div>
 
 <h2>
-  <input class="lockable category-title" value="出力JSON" disabled>
+  <input class="lockable category-title" value="出力結果" disabled>
 </h2>
 <pre id="output"></pre>
 
@@ -91,7 +91,7 @@ editBtn.onclick = () => {
 };
 
 /* ===============================
-   55項目 固定データ（完全）
+   固定データ（55項目）
 ================================ */
 const controls = [
   { title:"アクター名表示", body:"\\N[$1]", desc:"アクターn番の名前を表示" },
@@ -115,47 +115,39 @@ const tags = [
   { title:"選択肢終了", body:"<End>", desc:"選択肢終了" },
   { title:"スクロール文章開始", body:"<ShowScrollingText:$1,$2>", desc:"スクロール文章開始" },
   { title:"スクロール文章終了", body:"</ShowScrollingText>", desc:"スクロール文章終了" },
-
   { title:"スイッチON", body:"<Switch:$1,ON>", desc:"スイッチON" },
   { title:"スイッチOFF", body:"<Switch:$1,OFF>", desc:"スイッチOFF" },
   { title:"セルフスイッチON", body:"<SelfSwitch:$1,ON>", desc:"セルフスイッチON" },
   { title:"セルフスイッチOFF", body:"<SelfSwitch:$1,OFF>", desc:"セルフスイッチOFF" },
-
   { title:"変数代入", body:"<Set:$1,$2>", desc:"変数代入" },
   { title:"変数加算", body:"<Add:$1,$2>", desc:"変数加算" },
   { title:"変数減算", body:"<Sub:$1,$2>", desc:"変数減算" },
   { title:"変数乗算", body:"<Mul:$1,$2>", desc:"変数乗算" },
   { title:"変数除算", body:"<Div:$1,$2>", desc:"変数除算" },
   { title:"変数剰余", body:"<Mod:$1,$2>", desc:"変数剰余" },
-
   { title:"ラベル設置", body:"<Label:$1>", desc:"ラベル設置" },
   { title:"ラベルジャンプ", body:"<GotoLabel:$1>", desc:"ラベルジャンプ" },
   { title:"ループ中断", body:"<BreakLoop>", desc:"ループ中断" },
   { title:"イベント中断", body:"<AbortEvent>", desc:"イベント処理中断" },
-
   { title:"コモンイベント", body:"<CommonEvent:$1>", desc:"コモンイベント呼び出し" },
   { title:"タイマー開始", body:"<Timer:START,$1>", desc:"タイマー開始" },
   { title:"タイマー停止", body:"<Timer:STOP>", desc:"タイマー停止" },
   { title:"スクリプト実行", body:"<Script:$1>", desc:"スクリプト実行" },
   { title:"プラグインコマンド", body:"<PluginCommand:$1>", desc:"MVプラグインコマンド" },
   { title:"プラグインコマンドMZ", body:"<PluginCommandMZ:$1>", desc:"MZプラグインコマンド" },
-
   { title:"所持金操作", body:"<Gold:$1>", desc:"所持金操作" },
   { title:"アイテム増減", body:"<Item:$1,$2>", desc:"アイテム増減" },
   { title:"武器増減", body:"<Weapon:$1,$2>", desc:"武器増減" },
   { title:"防具増減", body:"<Armor:$1,$2>", desc:"防具増減" },
-
   { title:"ピクチャ表示", body:"<ShowPicture:$1,$2,$3,$4,$5,$6,$7,$8>", desc:"ピクチャ表示" },
   { title:"ピクチャ移動", body:"<MovePicture:$1,$2,$3,$4,$5,$6,$7,$8>", desc:"ピクチャ移動" },
   { title:"ピクチャ消去", body:"<ErasePicture:$1>", desc:"ピクチャ消去" },
   { title:"フェードアウト", body:"<FadeOut>", desc:"フェードアウト" },
   { title:"フェードイン", body:"<FadeIn>", desc:"フェードイン" },
-
   { title:"BGM再生", body:"<PlayBGM:$1,$2,$3,$4>", desc:"BGM再生" },
   { title:"BGM停止", body:"<FadeOutBGM:$1>", desc:"BGM停止" },
   { title:"SE再生", body:"<PlaySE:$1>", desc:"SE再生" },
   { title:"SE停止", body:"<StopSE>", desc:"SE停止" },
-
   { title:"メニュー表示", body:"<MenuScreen>", desc:"メニュー画面表示" },
   { title:"セーブ画面", body:"<SaveScreen>", desc:"セーブ画面表示" },
   { title:"ゲームオーバー", body:"<GameOver>", desc:"ゲームオーバー" },
@@ -163,16 +155,16 @@ const tags = [
 ];
 
 /* ===============================
-   表描画
+   表生成
 ================================ */
 const container = document.getElementById("tables");
 renderTable("制御文字（MZ）", controls);
 renderTable("Text2Frame タグ", tags);
 
-function renderTable(titleText,data){
+function renderTable(title,data){
   const h2=document.createElement("h2");
   const ti=document.createElement("input");
-  ti.value=titleText;
+  ti.value=title;
   ti.className="lockable category-title";
   ti.disabled=true;
   h2.appendChild(ti);
@@ -208,6 +200,8 @@ function addRow(table,d){
     <td><input></td>
     <td><button onclick="this.closest('tr').remove()">削除</button></td>`;
   table.appendChild(tr);
+
+  /* ★ Enter移動を必ずバインド */
   tr.querySelectorAll("input,textarea").forEach(bindKey);
 }
 
@@ -232,7 +226,7 @@ function moveDown(el){
   const next=tr.nextElementSibling;
   if(!next) return;
   const t=next.children[col].querySelector("input,textarea");
-  if(t&&!t.disabled) t.focus();
+  if(t && !t.disabled) t.focus();
 }
 
 /* ===============================
